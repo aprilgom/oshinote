@@ -10,7 +10,7 @@ function createWindow(){
         frame: false,
     })
 
-    win.loadURL("http://127.0.0.1:3000")
+    win.loadFile(path.join(__dirname,'index.html'))
     //win.webContents.openDevTools()
 }
 
