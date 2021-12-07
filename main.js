@@ -2,34 +2,30 @@
 
 const electron = require('electron')
 
-const {app} = electron
-
-const {BrowserWindow} = electron;
-
-let win
+const {app, BrowserWindow} = electron
+const path = require('path')
 
 function createWindow(){
-    win = new BrowserWindow({width: 800, height: 600})
-
-    win.loadURL('file://${__dirname}/index.html')
-
-    win.webContents.openDevTools()
-
-    win.on('closed',()=>{
-        win = null
+    const win = new BrowserWindow({
+        frame: false,
     })
+
+    win.loadURL("http://127.0.0.1:3000")
+    //win.webContents.openDevTools()
 }
 
-app.on('ready',createWindow)
+app.whenReady().then(() => {
+    createWindow()
 
-app.on('window-all-closed',()=> {
-    if(ProcessingInstruction.platform !== 'darwin'){
-        app.quit()
-    }
+    app.on('activate', () => {
+        if(BrowserWindow.getAllWindows().length === 0){
+            createWindow()
+        } 
+    })
 })
 
-app.on('activate', () => {
-    if (win == null){
-        createWindow()
+app.on('window-all-closed',()=> {
+    if(platform !== 'darwin'){
+        app.quit()
     }
 })
