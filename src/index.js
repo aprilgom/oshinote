@@ -48,7 +48,7 @@ canvas_container.addChild(gr_area)
 canvas_container.addChild(graphics)
 
 let size = 0.025;
-let brush_alpha = 0.5;
+//let brush_alpha = 0.5;
 let click_duration = 0;
 
 let drawingmode = "pencil"
@@ -78,6 +78,8 @@ function draw_pencil(origin_x,origin_y,dist){
     for(let i = 0;i < brush_spread_n * pressure; i++){
         let brush_spread_x = (Math.random()-0.5)*size*100;
         let brush_spread_y = (Math.random()-0.5)*size*100;
+        let brush_spread_dist = brush_spread_x^2 + brush_spread_y^2
+        let brush_alpha = Math.cos(Math.atan(brush_spread_dist));
         let x = origin_x + brush_spread_x
         let y = origin_y + brush_spread_y
         let brush_spread_size = (Math.random() + 3)/4
