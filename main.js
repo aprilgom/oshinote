@@ -2,11 +2,21 @@
 
 const electron = require('electron')
 
-const {app, BrowserWindow} = electron
+const {app, BrowserWindow, ipcMain} = electron
 const path = require('path')
+const fs = require('fs')
+
+ipcMain.on('saveTextures', (arg) => {
+    console.log(arg)
+})
 
 function createWindow(){
     const win = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            preload: path.join(__dirname,'preload.js')
+        },
         frame: false,
     })
 

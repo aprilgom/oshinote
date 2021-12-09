@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js'
 import * as PIXIEvents from "@pixi/events"
+import { MSAA_QUALITY } from 'pixi.js';
 
 delete PIXI.Renderer.__plugins.interaction;
 
@@ -25,27 +26,105 @@ function getAngle(point1, point2){
     return Math.atan2(
         point2.x - point1.x,
         point2.y - point1.y
-    );
+    )
 }
+const textures = []
+const base64_textures = window.myAPI.getTextures()
+for(let i = 0;i<base64_textures.length;i++){
+    //console.log(base64_textures[i])
+    let bt
+    if(base64_textures[i] === null){
+        bt = new PIXI.Texture(PIXI.Texture.EMPTY)
+    }else{
+        bt = new PIXI.Texture.from(base64_textures[i])
+    }
+    textures.push(bt)
+}
+
 const background = new PIXI.Sprite.from('background.jpg')
 app.stage.addChild(background)
 background.width = app.screen.width
 background.height = app.screen.height
 
-const canvas_container = new PIXI.Container();
+const canvas_container = new PIXI.Container()
 app.stage.addChild(canvas_container)
 
-const gr_area = new PIXI.Sprite();
+const gr_area = new PIXI.Sprite()
 gr_area.width = app.screen.width
 gr_area.height = app.screen.height
 
-const graphics = new PIXI.Graphics();
+const graphics = new PIXI.Graphics()
 
-const canvas = new PIXI.Sprite();
+const canvas = new PIXI.Sprite()
+//canvas.filters = [new PIXI.filters.FXAAFilter()]
+if(textures.length !== 0){
+    canvas.texture = textures[0]
+}
 
 canvas_container.addChild(canvas)
 canvas_container.addChild(gr_area)
 canvas_container.addChild(graphics)
+
+let current_page_n = 0;
+
+function makeButton(x,y,width,height,texture,eventlistener){
+    let button = new PIXI.Sprite(texture)
+    button.width = width;
+    button.height = height;
+    button.x = x;
+    button.y = y;
+    button.interactive = true;
+    button.buttonMode = true;
+    button.on('pointerdown',eventlistener);
+    return button
+}
+
+function movePage(page_n){
+    let texture = app.renderer.generateTexture(canvas_container,
+        {
+            scaleMode: PIXI.SCALE_MODES.LINEAR
+        }
+    )
+    if(textures[current_page_n] === null){
+        textures.push(texture)
+    }else{
+        textures[current_page_n] = texture
+    }
+    current_page_n = page_n;
+    graphics.clear()
+    canvas.texture.destroy(true)
+    canvas.texture = textures[current_page_n]
+}
+function nextPage(){
+    movePage(current_page_n+1)
+}
+function prevPage(){
+    if(current_page_n === 0){
+        return
+    }
+    movePage(current_page_n-1)
+}
+
+const next_button = makeButton(
+    app.screen.width/2,
+    0,
+    30,
+    app.screen.height,
+    new PIXI.Texture(PIXI.Texture.WHITE),
+    nextPage
+)
+next_button.anchor.set(1,0);
+app.stage.addChild(next_button)
+
+const prev_button = makeButton(
+    0,
+    0,
+    30,
+    app.screen.height,
+    new PIXI.Texture(PIXI.Texture.WHITE),
+    prevPage
+)
+app.stage.addChild(prev_button)
 
 let size = 0.025;
 //let brush_alpha = 0.5;
@@ -105,7 +184,9 @@ function eraser(origin_x,origin_y){
         .drawCircle(origin_x,origin_y,55*size*4)
         .endHole()
         .endFill();
-    let texture = app.renderer.generateTexture(canvas_container)
+    let texture = app.renderer.generateTexture(
+        canvas_container
+    )
     canvas.texture.destroy(true)
     canvas.texture = texture
     canvas.mask = null;
@@ -144,14 +225,17 @@ app.stage.addEventListener('pointermove',(e) => {
 
 app.stage.addEventListener('pointerup',(e) => {
     isDrawing = false;
-    let texture = app.renderer.generateTexture(canvas_container)
+    let texture = app.renderer.generateTexture(
+        canvas_container,
+    )
+    base64_textures[current_page_n] = app.renderer.plugins.extract.base64(texture)
+    window.myAPI.saveTextures(base64_textures)
     canvas.texture.destroy(true)
     canvas.texture = texture
     if(canvas.mask !== null){
         canvas.mask = null
     }
     graphics.clear()
-    //canvas.destory()
 })
 
 app.stage.addEventListener('rightdown',(e)=>{
