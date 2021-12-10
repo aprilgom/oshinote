@@ -91,7 +91,7 @@ function savePage(page_n){
 
     base64_textures[page_n] = app.renderer.plugins.extract.base64(texture)
     window.myAPI.saveTextures(base64_textures)
-    canvas.texture.destroy(true)
+    //canvas.texture.destroy(true)
     canvas.texture = texture
 }
 
