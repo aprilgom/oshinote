@@ -13,6 +13,16 @@ const app = new PIXI.Application({
     height: innerHeight
 })
 document.body.appendChild(app.view);
+let windowTopBar = document.createElement('div')
+windowTopBar.style.width = "100%"
+windowTopBar.style.height = "32px"
+//windowTopBar.style.backgroundColor = "#000"
+windowTopBar.style.alpha = 0
+windowTopBar.style.position = "absolute"
+windowTopBar.style.top = windowTopBar.style.left = 0
+windowTopBar.style.webkitAppRegion = "drag"
+document.body.appendChild(windowTopBar)
+
 
 if(!('events' in app.renderer)){
     app.renderer.addSystem(PIXIEvents.EventSystem,"events")
@@ -31,6 +41,10 @@ function getAngle(point1, point2){
         point2.y - point1.y
     )
 }
+const background = new PIXI.Sprite.from('background.jpg')
+app.stage.addChild(background)
+background.width = app.screen.width
+background.height = app.screen.height
 const textures = []
 const base64_textures = window.myAPI.getTextures()
 for(let i = 0;i<base64_textures.length;i++){
@@ -44,10 +58,6 @@ for(let i = 0;i<base64_textures.length;i++){
     textures.push(bt)
 }
 
-const background = new PIXI.Sprite.from('background.jpg')
-app.stage.addChild(background)
-background.width = app.screen.width
-background.height = app.screen.height
 
 const canvas_container = new PIXI.Container()
 app.stage.addChild(canvas_container)

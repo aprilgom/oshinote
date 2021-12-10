@@ -2,9 +2,10 @@
 
 const electron = require('electron')
 
-const {app, BrowserWindow } = electron
+const {app, BrowserWindow, Menu } = electron
 const path = require('path')
-const fs = require('fs')
+
+Menu.setApplicationMenu(null)
 
 function createWindow(){
     const win = new BrowserWindow({
@@ -15,12 +16,12 @@ function createWindow(){
             //zoomFactor: 1
         },
         resizable: false,
-        //frame: false
+        frame: false
     })
 
     win.loadFile(path.join(__dirname,'index.html'))
     win.setContentSize(390,570)
-    win.webContents.openDevTools()
+    //win.webContents.openDevTools()
 }
 
 app.whenReady().then(() => {
@@ -31,14 +32,11 @@ app.whenReady().then(() => {
             createWindow()
         } 
     })
-    const{ screen } = require('electron')
-
-    const primaryDisplay = screen.getPrimaryDisplay()
 
 })
 
 app.on('window-all-closed',()=> {
-    if(platform !== 'darwin'){
+    if(process.platform !== 'darwin'){
         app.quit()
     }
 })
