@@ -2,25 +2,24 @@
 
 const electron = require('electron')
 
-const {app, BrowserWindow, ipcMain} = electron
+const {app, BrowserWindow } = electron
 const path = require('path')
 const fs = require('fs')
 
-ipcMain.on('saveTextures', (arg) => {
-    console.log(arg)
-})
-
 function createWindow(){
     const win = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 390,
+        height: 570,
         webPreferences: {
-            preload: path.join(__dirname,'preload.js')
+            preload: path.join(__dirname,'preload.js'),
+            //zoomFactor: 1
         },
-        frame: false,
+        resizable: false,
+        frame: false
     })
 
     win.loadFile(path.join(__dirname,'index.html'))
+    win.setContentSize(390,570)
     win.webContents.openDevTools()
 }
 
@@ -32,6 +31,10 @@ app.whenReady().then(() => {
             createWindow()
         } 
     })
+    const{ screen } = require('electron')
+
+    const primaryDisplay = screen.getPrimaryDisplay()
+
 })
 
 app.on('window-all-closed',()=> {

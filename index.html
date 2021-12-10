@@ -5,12 +5,23 @@
             canvas{
                 object-fit: cover;
             }
+            html{
+                max-width: max-content;
+                max-height: max-content;
+            }
+            body{
+                overflow-x: hidden;
+                overflow-y: hidden;
+                box-sizing: border-box;
+                margin: 0px;
+                padding: 0px;
+            }
         </style>
         <meta charset="utf-8"/>
         <!--meta name="viewport" content="width=device-width, initial-scale=1" /-->
     </head>
     <!--body style="-webkit-app-region: drag"-->
-    <body style="margin:0px">
+    <body>
         <script type= "module" src= "dist/index-bundle.js"></script>
     </body>
 </html>

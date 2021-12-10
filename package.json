@@ -9,6 +9,7 @@
   "devDependencies": {
     "@babel/core": "^7.16.0",
     "@pixi/events": "^6.2.0",
+    "@pixi/graphics-extras": "^6.2.0",
     "babel-loader": "^8.2.3",
     "electron": "^16.0.4",
     "electron-storage": "^1.0.7",

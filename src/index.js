@@ -1,13 +1,16 @@
 import * as PIXI from 'pixi.js'
 import * as PIXIEvents from "@pixi/events"
-import { MSAA_QUALITY } from 'pixi.js';
 
 delete PIXI.Renderer.__plugins.interaction;
-
+//PIXI.settings.FILTER_MULTISAMPLE = PIXI.MSAA_QUALITY.HIGH
 const app = new PIXI.Application({
     antialias: true,
     autoDensity: true,
+    resolution: devicePixelRatio,
     backgroundColor: 0xffffff,
+    //autoResize:true,
+    width: innerWidth,
+    height: innerHeight
 })
 document.body.appendChild(app.view);
 
@@ -104,16 +107,20 @@ function prevPage(){
     }
     movePage(current_page_n-1)
 }
+let button_texture = new PIXI.Texture(PIXI.Texture.WHITE);
 
 const next_button = makeButton(
-    app.screen.width/2,
+    app.screen.width,
     0,
     30,
     app.screen.height,
-    new PIXI.Texture(PIXI.Texture.WHITE),
+    button_texture,
     nextPage
 )
 next_button.anchor.set(1,0);
+next_button.alpha = 0.5
+next_button.tint = 0x000000;
+
 app.stage.addChild(next_button)
 
 const prev_button = makeButton(
@@ -121,12 +128,14 @@ const prev_button = makeButton(
     0,
     30,
     app.screen.height,
-    new PIXI.Texture(PIXI.Texture.WHITE),
+    button_texture,
     prevPage
 )
+prev_button.alpha = 0.5
+prev_button.tint = 0x000000;
 app.stage.addChild(prev_button)
 
-let size = 0.025;
+let size = 0.5;
 //let brush_alpha = 0.5;
 let click_duration = 0;
 
@@ -153,24 +162,39 @@ function draw_pencil(origin_x,origin_y,dist){
     if(pressure < 0.8){
         pressure = 0.8
     }
-    let brush_spread_n = 0.25/size*pressure;
-    for(let i = 0;i < brush_spread_n * pressure; i++){
-        let brush_spread_x = (Math.random()-0.5)*size*100;
-        let brush_spread_y = (Math.random()-0.5)*size*100;
+    let brush_spread_n = 0.75/size*pressure;
+    for(let i = 0;i < brush_spread_n; i++){
+        let brush_spread_x = (Math.random()-0.5)*size;
+        let brush_spread_y = (Math.random()-0.5)*size;
         let brush_spread_dist = brush_spread_x^2 + brush_spread_y^2
         let brush_alpha = Math.cos(Math.atan(brush_spread_dist));
         let x = origin_x + brush_spread_x
         let y = origin_y + brush_spread_y
-        let brush_spread_size = (Math.random() + 3)/4
-        let w = pencil.width*size*brush_spread_size*pressure
-        let h = pencil.height*size*brush_spread_size*pressure
+        let brush_spread_size = 0.1*size*pressure*(Math.random() + 3)/4
+        let w = pencil.width*brush_spread_size
+        let h = pencil.height*brush_spread_size
+        let r = Math.sqrt(w)
         let brush_spread_angle = Math.random()*Math.PI*2
+        /*
         graphics.beginTextureFill({
             texture: pencil,
             alpha:brush_alpha,
             matrix: new PIXI.Matrix(1,0,0,1,x-pencil.width/2,y-pencil.height/2).rotate(brush_spread_angle)
         });
+        */
+        let tex_mat = new PIXI.Matrix()
+            .translate(-pencil.width/2,-pencil.height/2)
+            //.rotate(brush_spread_angle)
+            .scale(brush_spread_size,brush_spread_size)
+            .translate(x,y)
+            .rotate(brush_spread_angle)
+        graphics.beginTextureFill({
+            texture: pencil,
+            alpha:brush_alpha,
+            matrix: tex_mat
+        });
         graphics.drawRect(x-w/2,y-h/2,w,h);
+        //graphics.drawCircle(x,y,r)
         graphics.endFill();
     }
 }
@@ -181,7 +205,7 @@ function eraser(origin_x,origin_y){
         .beginFill(0x000000,1)
         .drawRect(0,0,app.screen.width,app.screen.height)
         .beginHole()
-        .drawCircle(origin_x,origin_y,55*size*4)
+        .drawCircle(origin_x,origin_y,55*size)
         .endHole()
         .endFill();
     let texture = app.renderer.generateTexture(
@@ -198,7 +222,7 @@ app.stage.addEventListener('pointerdown',(e) => {
     click_duration = 0;
     lastPoint = {x: e.clientX,y: e.clientY};
     if(drawingmode == "pencil"){
-        draw_pencil(lastPoint.x,lastPoint.y)
+        draw_pencil(lastPoint.x,lastPoint.y,1)
     }else{
         eraser(lastPoint.x,lastPoint.y);
     }
@@ -226,7 +250,7 @@ app.stage.addEventListener('pointermove',(e) => {
 app.stage.addEventListener('pointerup',(e) => {
     isDrawing = false;
     let texture = app.renderer.generateTexture(
-        canvas_container,
+        canvas_container
     )
     base64_textures[current_page_n] = app.renderer.plugins.extract.base64(texture)
     window.myAPI.saveTextures(base64_textures)
