@@ -280,6 +280,14 @@ app.stage.addEventListener('pointerdown',(e) => {
     */
 })
 
+app.stage.addEventListener('rightdown',(e)=>{
+    if(drawingmode == "pencil"){
+        drawingmode = "eraser"
+    }else{
+        drawingmode = "pencil"
+    }
+})
+
 
 app.stage.addEventListener('pointermove',(e) => {
     if (!isDrawing) return;
@@ -312,12 +320,4 @@ app.stage.addEventListener('pointerup',(e) => {
         canvas.mask = null
     }
     graphics.clear()
-})
-
-app.stage.addEventListener('rightdown',(e)=>{
-    if(drawingmode == "pencil"){
-        drawingmode = "eraser"
-    }else{
-        drawingmode = "pencil"
-    }
 })

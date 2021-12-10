@@ -16,11 +16,15 @@ function createWindow(){
             //zoomFactor: 1
         },
         resizable: false,
-        frame: false
+        frame: false,
+        show: false
     })
 
     win.loadFile(path.join(__dirname,'index.html'))
     win.setContentSize(390,570)
+    win.webContents.once('did-finish-load',()=>{
+        win.show()
+    })
     //win.webContents.openDevTools()
 }
 
