@@ -15,7 +15,7 @@ function createWindow(){
             //zoomFactor: 1
         },
         resizable: false,
-        frame: false
+        //frame: false
     })
 
     win.loadFile(path.join(__dirname,'index.html'))

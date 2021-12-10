@@ -70,7 +70,7 @@ canvas_container.addChild(graphics)
 
 let current_page_n = 0;
 
-function makeButton(x,y,width,height,texture,eventlistener){
+function makeButton(x,y,width,height,texture){
     let button = new PIXI.Sprite(texture)
     button.width = width;
     button.height = height;
@@ -78,7 +78,6 @@ function makeButton(x,y,width,height,texture,eventlistener){
     button.y = y;
     button.interactive = true;
     button.buttonMode = true;
-    button.on('pointerdown',eventlistener);
     return button
 }
 
@@ -107,6 +106,12 @@ function prevPage(){
     }
     movePage(current_page_n-1)
 }
+function onButtonOver(){
+    this.isOver = true;
+}
+function onButtonOut(){
+    this.isOver = false;
+}
 let button_texture = new PIXI.Texture(PIXI.Texture.WHITE);
 
 const next_button = makeButton(
@@ -115,11 +120,28 @@ const next_button = makeButton(
     30,
     app.screen.height,
     button_texture,
-    nextPage
 )
 next_button.anchor.set(1,0);
 next_button.alpha = 0.5
 next_button.tint = 0x000000;
+next_button.on('pointerdown',nextPage)
+    .on('pointerover',onButtonOver)
+    .on('pointerout',onButtonOut)
+let next_button_alpha_ease = 0;
+app.ticker.add((delta) => {
+    if(next_button.isOver){
+        next_button_alpha_ease += 0.1;
+    }else{
+        next_button_alpha_ease -= 0.1;
+    }
+    if(next_button_alpha_ease < 0){
+        next_button_alpha_ease = 0;
+    }
+    if(next_button_alpha_ease >= 1){
+        next_button_alpha_ease = 1;
+    }
+    next_button.alpha = 0.5*Math.atan(next_button_alpha_ease)
+})
 
 app.stage.addChild(next_button)
 
@@ -129,10 +151,28 @@ const prev_button = makeButton(
     30,
     app.screen.height,
     button_texture,
-    prevPage
 )
-prev_button.alpha = 0.5
+prev_button.alpha = 0
 prev_button.tint = 0x000000;
+prev_button.on('pointerdown',prevPage)
+    .on('pointerover',onButtonOver)
+    .on('pointerout',onButtonOut)
+let prev_button_alpha_ease = 0;
+app.ticker.add((delta) => {
+    if(prev_button.isOver){
+        prev_button_alpha_ease += 0.1;
+    }else{
+        prev_button_alpha_ease -= 0.1;
+    }
+    if(prev_button_alpha_ease < 0){
+        prev_button_alpha_ease = 0;
+    }
+    if(prev_button_alpha_ease >= 1){
+        prev_button_alpha_ease = 1;
+    }
+    prev_button.alpha = 0.5*Math.atan(prev_button_alpha_ease)
+})
+
 app.stage.addChild(prev_button)
 
 let size = 0.5;
@@ -221,11 +261,13 @@ app.stage.addEventListener('pointerdown',(e) => {
     isDrawing = true;
     click_duration = 0;
     lastPoint = {x: e.clientX,y: e.clientY};
+    /*
     if(drawingmode == "pencil"){
         draw_pencil(lastPoint.x,lastPoint.y,1)
     }else{
         eraser(lastPoint.x,lastPoint.y);
     }
+    */
 })
 
 
