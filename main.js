@@ -15,7 +15,7 @@ function createWindow(){
             preload: path.join(__dirname,'preload.js'),
             //zoomFactor: 1
         },
-        //resizable: false,
+        resizable: false,
         frame: false,
         show: false
     })
@@ -25,7 +25,7 @@ function createWindow(){
     win.webContents.once('did-finish-load',()=>{
         win.show()
     })
-    win.webContents.openDevTools()
+    //win.webContents.openDevTools()
 }
 
 app.whenReady().then(() => {

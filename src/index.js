@@ -45,17 +45,11 @@ const background = new PIXI.Sprite.from('background.png')
 app.stage.addChild(background)
 background.width = app.screen.width
 background.height = app.screen.height
-const textures = []
+const textures = {}
 const base64_textures = window.myAPI.getTextures()
-for(let i = 0;i<base64_textures.length;i++){
-    //console.log(base64_textures[i])
-    let bt
-    if(base64_textures[i] === null){
-        bt = new PIXI.Texture(PIXI.Texture.EMPTY)
-    }else{
-        bt = new PIXI.Texture.from(base64_textures[i])
-    }
-    textures.push(bt)
+for(let i = 0;i<Object.keys(base64_textures).length;i++){
+    textures[i] = new PIXI.Texture.from(base64_textures[i])
+    console.log(textures[i])
 }
 
 
@@ -79,9 +73,8 @@ const canvas = new PIXI.Sprite()
 
 
 //canvas.filters = [new PIXI.filters.FXAAFilter()]
-if(textures.length !== 0){
-    canvas.texture = textures[0]
-}
+let current_page_n = 0;
+loadPage(current_page_n)
 
 canvas_container.addChild(canvas)
 canvas_container.addChild(gr_area)
@@ -90,7 +83,57 @@ canvas_container.addChild(screen_mask)
 
 graphics.mask = screen_mask
 
-let current_page_n = 0;
+
+function savePage(page_n){
+
+    let texture = app.renderer.generateTexture(canvas_container)
+    textures[page_n] = texture
+
+    base64_textures[page_n] = app.renderer.plugins.extract.base64(texture)
+    window.myAPI.saveTextures(base64_textures)
+    canvas.texture.destroy(true)
+    canvas.texture = texture
+}
+
+function loadPage(page_n){
+
+    graphics.clear()
+    //canvas.texture.destroy(true)
+    console.log(page_n)
+    console.log(textures[page_n])
+    if(textures[page_n] !== undefined && textures[page_n] !== null){
+        canvas.texture = textures[page_n]
+    }else{
+        canvas.texture = null
+    }
+    console.log(textures[page_n])
+
+}
+
+function movePage(page_n){
+    //savePage(current_page_n)
+    current_page_n = page_n;
+    loadPage(page_n)
+}
+
+function nextPage(){
+    movePage(current_page_n+1)
+}
+
+function prevPage(){
+    if(current_page_n === 0){
+        return
+    }
+    movePage(current_page_n-1)
+}
+window.addEventListener('keydown',(e) => {
+    if(e.key === "ArrowRight"){
+        nextPage()
+    }
+    if(e.key === "ArrowLeft"){
+        prevPage()
+    }
+})
 
 function makeButton(x,y,width,height,texture){
     let button = new PIXI.Sprite(texture)
@@ -103,34 +146,6 @@ function makeButton(x,y,width,height,texture){
     return button
 }
 
-function movePage(page_n){
-    let texture = app.renderer.generateTexture(canvas_container,
-        {
-            scaleMode: PIXI.SCALE_MODES.LINEAR
-        }
-    )
-    if(textures[current_page_n] === null){
-        textures.push(texture)
-    }else{
-        textures[current_page_n] = texture
-    }
-    current_page_n = page_n;
-    graphics.clear()
-    canvas.texture.destroy(true)
-    if(textures[current_page_n] === null){
-        textures[current_page_n] = new PIXI.Texture(new PIXI.Texture.WHITE)
-    }
-    canvas.texture = textures[current_page_n]
-}
-function nextPage(){
-    movePage(current_page_n+1)
-}
-function prevPage(){
-    if(current_page_n === 0){
-        return
-    }
-    movePage(current_page_n-1)
-}
 function onButtonOver(){
     this.isOver = true;
 }
@@ -283,6 +298,9 @@ function eraser(origin_x,origin_y){
 }
 
 app.stage.addEventListener('pointerdown',(e) => {
+    if(next_button.isOver || prev_button.isOver){
+        return
+    }
     isDrawing = true;
     click_duration = 0;
     lastPoint = {x: e.clientX,y: e.clientY};
@@ -322,16 +340,9 @@ window.addEventListener('pointermove',(e) => {
     lastPoint = currentPoint;
 });
 
-app.stage.addEventListener('pointerin',(e) => {
-    //drawEnd()
-    //isDrawing = true;
-})
-
 window.addEventListener('pointerup',(e) => {
     drawEnd()
 })
-
-
 
 function drawEnd(){
     isDrawing = false;
@@ -340,14 +351,4 @@ function drawEnd(){
         canvas.mask = null
     }
     graphics.clear()
-}
-
-function savePage(page_n){
-    let texture = app.renderer.generateTexture(
-        canvas_container
-    )
-    base64_textures[page_n] = app.renderer.plugins.extract.base64(texture)
-    window.myAPI.saveTextures(base64_textures)
-    canvas.texture.destroy(true)
-    canvas.texture = texture
 }
