@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "main": "main.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
-    "start": "npm run build && electron ."
+    "indexpack": "webpack --config webpack.config.js",
+    "start": "npm run indexpack && electron .",
+    "build:win": "electron-builder --win portable"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
@@ -12,10 +13,20 @@
     "@pixi/graphics-extras": "^6.2.0",
     "babel-loader": "^8.2.3",
     "electron": "^16.0.4",
+    "electron-builder": "^22.14.5",
     "electron-storage": "^1.0.7",
     "pixi.js": "^6.2.0",
     "webpack": "^5.65.0",
     "webpack-cli": "^4.9.1"
+  },
+  "build:win":{
+    "files":[
+      "index-bundle.js",
+      "main.js",
+      "background.png",
+      "pencil.png",
+      "!textures.json"
+    ]
   },
   "browserslist": {
     "production": [

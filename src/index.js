@@ -41,7 +41,7 @@ function getAngle(point1, point2){
         point2.y - point1.y
     )
 }
-const background = new PIXI.Sprite.from('background.jpg')
+const background = new PIXI.Sprite.from('background.png')
 app.stage.addChild(background)
 background.width = app.screen.width
 background.height = app.screen.height
@@ -68,7 +68,16 @@ gr_area.height = app.screen.height
 
 const graphics = new PIXI.Graphics()
 
+const screen_mask = new PIXI.Graphics()
+
+screen_mask
+.beginFill(0x000000)
+.drawRect(0,0,app.screen.width,app.screen.height)
+.endFill;
+
 const canvas = new PIXI.Sprite()
+
+
 //canvas.filters = [new PIXI.filters.FXAAFilter()]
 if(textures.length !== 0){
     canvas.texture = textures[0]
@@ -77,6 +86,9 @@ if(textures.length !== 0){
 canvas_container.addChild(canvas)
 canvas_container.addChild(gr_area)
 canvas_container.addChild(graphics)
+canvas_container.addChild(screen_mask)
+
+graphics.mask = screen_mask
 
 let current_page_n = 0;
 
@@ -105,6 +117,9 @@ function movePage(page_n){
     current_page_n = page_n;
     graphics.clear()
     canvas.texture.destroy(true)
+    if(textures[current_page_n] === null){
+        textures[current_page_n] = new PIXI.Texture(new PIXI.Texture.WHITE)
+    }
     canvas.texture = textures[current_page_n]
 }
 function nextPage(){
@@ -289,7 +304,7 @@ app.stage.addEventListener('rightdown',(e)=>{
 })
 
 
-app.stage.addEventListener('pointermove',(e) => {
+window.addEventListener('pointermove',(e) => {
     if (!isDrawing) return;
     click_duration++;
     let currentPoint = { x: e.clientX, y:e.clientY};
@@ -307,17 +322,32 @@ app.stage.addEventListener('pointermove',(e) => {
     lastPoint = currentPoint;
 });
 
-app.stage.addEventListener('pointerup',(e) => {
+app.stage.addEventListener('pointerin',(e) => {
+    //drawEnd()
+    //isDrawing = true;
+})
+
+window.addEventListener('pointerup',(e) => {
+    drawEnd()
+})
+
+
+
+function drawEnd(){
     isDrawing = false;
-    let texture = app.renderer.generateTexture(
-        canvas_container
-    )
-    base64_textures[current_page_n] = app.renderer.plugins.extract.base64(texture)
-    window.myAPI.saveTextures(base64_textures)
-    canvas.texture.destroy(true)
-    canvas.texture = texture
+    savePage(current_page_n)
     if(canvas.mask !== null){
         canvas.mask = null
     }
     graphics.clear()
-})
+}
+
+function savePage(page_n){
+    let texture = app.renderer.generateTexture(
+        canvas_container
+    )
+    base64_textures[page_n] = app.renderer.plugins.extract.base64(texture)
+    window.myAPI.saveTextures(base64_textures)
+    canvas.texture.destroy(true)
+    canvas.texture = texture
+}

@@ -1,11 +1,12 @@
 const { contextBridge} = require('electron')
 const fs = require('fs')
-const textures = require("./textures.json")
 
 
 contextBridge.exposeInMainWorld('myAPI',{
     getTextures: () => {
-        return textures
+        //return require("./textures.json")
+        let textures = fs.readFileSync("./textures.json")
+        return JSON.parse(textures)
     },
     saveTextures: (target) => {
         fs.writeFileSync("./textures.json", JSON.stringify(target))

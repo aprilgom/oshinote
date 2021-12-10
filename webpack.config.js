@@ -1,10 +1,9 @@
-const common_config = {
-}
 
 module.exports={
     entry: './src/index.js',
     output: {
         filename: 'index-bundle.js',
+        path: __dirname
     },
     mode: 'development',
     module:{
