@@ -297,11 +297,12 @@ function eraser(origin_x,origin_y){
     graphics.clear()
 }
 
-app.stage.addEventListener('pointerdown',(e) => {
+app.stage.addEventListener('mousedown',(e) => {
     if(next_button.isOver || prev_button.isOver){
         return
     }
     isDrawing = true;
+    drawingmode = "pencil"
     click_duration = 0;
     lastPoint = {x: e.clientX,y: e.clientY};
     /*
@@ -314,11 +315,10 @@ app.stage.addEventListener('pointerdown',(e) => {
 })
 
 app.stage.addEventListener('rightdown',(e)=>{
-    if(drawingmode == "pencil"){
-        drawingmode = "eraser"
-    }else{
-        drawingmode = "pencil"
-    }
+    isDrawing = true;
+    drawingmode = "eraser"
+    click_duration = 0;
+    lastPoint = {x: e.clientX,y: e.clientY};
 })
 
 
